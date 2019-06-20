@@ -233,6 +233,18 @@ eachOME.run <- function(env)
   metadata.ome=env$metadata[,ids]/(1-w)*w_ome
   indata.ome=env$indata[,ids]/(1-w)*w_ome
 
+
+  group.labels.exp=env$group.labels[-ids]
+  group.labels.meth=env$group.labels[ids]
+
+  group.metadata.exp = do.call(cbind, by(t(metadata.exp), group.labels.exp, colMeans))[,unique(env$group.labels)]
+  group.metadata.meth = do.call(cbind, by(t(metadata.mome), group.labels.ome, colMeans))[,unique(env$group.labels)]
+
+
+
+  util.call(meanportraits, env)
+
+
   foreach(iterat=1:3) %dopar%
   {
 
@@ -301,7 +313,7 @@ eachOME.run <- function(env)
       env$indata.sample.mean =colMeans(env$indata)
 
     }
-    library(oposSOM)
+    #library(oposSOM)
 
     dir.create(paste(env$files.name, "- Results/Sample Similarity Analysis"), showWarnings=FALSE)
     dir.create(paste(env$files.name, "- Results/Summary Sheets - Groups"), showWarnings=FALSE)

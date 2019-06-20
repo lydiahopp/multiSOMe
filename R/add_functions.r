@@ -4,6 +4,52 @@ for(name in r) eval(parse(text=paste0(name, '<-oposSOM:::', name)))
 
 
 
+meanportraits <- function()
+{
+
+  pdf("Mean_portraits_ScoVs_all_omes.pdf",15,(1.5*length(unique(group.labels))+1))
+  layout(t(matrix(c(1:(10*(1+length(unique(group.labels))))),ncol=(1+length(unique(group.labels))))),width=c(2,2,2,2,2),height=c(1,rep(2,length(unique(group.labels)))))
+  #par(mfrow=c(9,7))
+  options("scipen"=-100,digits=5)
+  par(mar=c(1,1,1,1))
+  plot(0, type="n", axes=FALSE, xlab="", ylab="", xlim=c(0,1), ylim=c(0,1))
+  for(j in 1:9)
+  {
+    plot(0, type="n", axes=FALSE, xlab="", ylab="", xlim=c(0,1), ylim=c(0,1))
+    text(0.5,0.5,c("Mean Exp","Mean Meth",#"Mean CNV","ScoV CNV Meth","ScoV CNV Exp",
+                   "ScoV Meth Exp",#"CoV CNV Meth","CoV cnv Exp",
+                   "CoV Meth Exp")[j],cex=1.5)
+  }
+  for(i in 1:length(unique(group.labels)))
+  {
+
+    plot(0, type="n", axes=FALSE, xlab="", ylab="", xlim=c(0,1), ylim=c(0,1))
+    text(0.5,0.5,unique(group.labels)[i],cex=2)
+    image( matrix( group.metadata.exp[,i], preferences$dim.1stLvlSom,preferences$dim.1stLvlSom ), axes=F, col = color.palette.portraits(1000),zlim=max(abs(group.metadata.exp[,i]))*c(-1,1)  )
+    box()
+    image( matrix( group.metadata.meth[,i], preferences$dim.1stLvlSom,preferences$dim.1stLvlSom ), axes=F, col = color.palette.portraits(1000),zlim=max(abs(group.metadata.meth[,i]))*c(-1,1)  )
+    box()
+
+    s=sign(group.metadata.meth*group.metadata.exp)*sqrt(abs(group.metadata.meth*group.metadata.exp))
+    #s=do.call(cbind, by(t(s),group.labels[grep("cnv",names(group.labels))], colMeans)[unique(group.labels)])
+
+    image( matrix( s[,i], preferences$dim.1stLvlSom, preferences$dim.1stLvlSom ), axes=F, col = color.palette.portraits(1000),zlim=max(abs(s[,i]))*c(-1,1)  )
+    #	mtext(text=paste0("(",as.character(round(min(s[,i]),3)),",",as.character(round(max(s[,i]),3)),")"),side=1,line=0.9,cex=1.4)
+    box()
+
+    s=(sapply(group.metadata.meth[,i],function(x){x-mean(group.metadata.meth[,i])}))*(sapply(group.metadata.exp[,i],function(x){x-mean(group.metadata.exp[,i])}))
+    #s=do.call(cbind, by(t(s),group.labels[grep("cnv",names(group.labels))], colMeans)[unique(group.labels)])
+
+    image( matrix( s, preferences$dim.1stLvlSom, preferences$dim.1stLvlSom ), axes=F, col = color.palette.portraits(1000),zlim=max(abs(s))*c(-1,1)  )
+    #	mtext(text=paste0("(",as.character(round(min(s[,i]),3)),",",as.character(round(max(s[,i]),3)),")"),side=1,line=0.9,cex=1.4)
+    box()
+
+  }
+  dev.off()
+
+}
+
+
 summarySheetsModules2 <- function()
 {
   environment(modules.CSV.sheets) <- environment()
