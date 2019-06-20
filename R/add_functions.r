@@ -13,12 +13,10 @@ meanportraits <- function()
   options("scipen"=-100,digits=5)
   par(mar=c(1,1,1,1))
   plot(0, type="n", axes=FALSE, xlab="", ylab="", xlim=c(0,1), ylim=c(0,1))
-  for(j in 1:9)
+  for(j in 1:4)
   {
     plot(0, type="n", axes=FALSE, xlab="", ylab="", xlim=c(0,1), ylim=c(0,1))
-    text(0.5,0.5,c("Mean Exp","Mean Meth",#"Mean CNV","ScoV CNV Meth","ScoV CNV Exp",
-                   "ScoV Meth Exp",#"CoV CNV Meth","CoV cnv Exp",
-                   "CoV Meth Exp")[j],cex=1.5)
+    text(0.5,0.5,c("Mean Exp","Mean Meth", "ScoV Meth Exp", "CoV Meth Exp")[j],cex=1.5)
   }
   for(i in 1:length(unique(group.labels)))
   {
