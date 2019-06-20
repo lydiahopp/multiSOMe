@@ -237,12 +237,12 @@ eachOME.run <- function(env)
   group.labels.exp=env$group.labels[-ids]
   group.labels.meth=env$group.labels[ids]
 
-  group.metadata.exp = do.call(cbind, by(t(metadata.exp), group.labels.exp, colMeans))[,unique(env$group.labels)]
-  group.metadata.meth = do.call(cbind, by(t(metadata.mome), group.labels.ome, colMeans))[,unique(env$group.labels)]
+  group.metadata.exp = do.call(cbind, by(t(metadata.exp), group.labels.exp, colMeans))[,unique(group.labels.exp)]
+  group.metadata.meth = do.call(cbind, by(t(metadata.ome), group.labels.meth, colMeans))[,unique(group.labels.meth)]
 
 
-
-  util.call(meanportraits, env)
+  if(group.labels.exp==group.labels.meth)
+    {util.call(meanportraits, env)}
 
 
   foreach(iterat=1:3) %dopar%
@@ -286,7 +286,7 @@ eachOME.run <- function(env)
       env$spot.list.samples=env$spot.list.samples [ids]
       env$pat.labels= env$pat.labels[ids]
     }
-    if(iterat==3)
+    if(iterat==3 && group.labels.exp==group.labels.meth)
     {
       env$files.name="ScoV"
       env$metadata=sign(metadata.ome*metadata.exp)*sqrt(abs(metadata.ome*metadata.exp))
@@ -332,7 +332,7 @@ eachOME.run <- function(env)
  #   pipeline.moduleCorrelationMap <- oposSOM:::pipeline.moduleCorrelationMap
 #    modules.report.sheets <- oposSOM:::modules.report.sheets
 
-    if(iterat==3)
+    if(iterat==3 && group.labels.exp==group.labels.meth)
     {
       util.call(oposSOM:::pipeline.calcStatistics, env)
 
@@ -392,7 +392,7 @@ eachOME.run <- function(env)
 
     util.info("Plotting Summary Sheets (Modules & PATs)")
 
-    if(iterat==3)
+    if(iterat==3 && group.labels.exp==group.labels.meth)
     {
       util.call(ScoV.underexp,env)
     }

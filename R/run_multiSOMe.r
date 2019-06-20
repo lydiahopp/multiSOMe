@@ -52,6 +52,8 @@ run.som <- function(modpar=modpar,modsom=modsom)
   # Define sample groups
   env$group.labels <- modsom$group.labels
 
+  if(exists("group.colors"))
+    env$group.colors <- group.colors
 
   multiSOMe.run(env)
   eachOME.run(env)
