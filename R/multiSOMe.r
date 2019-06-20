@@ -340,8 +340,8 @@ eachOME.run <- function(env)
    # util.call(oposSOM:::pipeline.supportingMaps, env)
     if(iterat!=3)
     {
-      util.call(entropyProfiles, env)
-      util.call(topologyProfiles, env)
+      util.call(oposSOM:::pipeline.entropyProfiles, env)
+      util.call(oposSOM:::pipeline.topologyProfiles, env)
     }
 
     util.call(oposSOM:::pipeline.sampleExpressionPortraits, env)
@@ -385,7 +385,7 @@ eachOME.run <- function(env)
       util.call(ScoV.underexp,env)
     }
    # util.call(oposSOM:::pipeline.summarySheetsModules, env)
-    util.call(summarySheetsModules, env)
+    util.call(oposSOM:::pipeline.summarySheetsModules, env)
     util.call(oposSOM:::pipeline.summarySheetsPATs, env)
 
 
