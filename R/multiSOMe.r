@@ -202,7 +202,7 @@ eachOME.run <- function(env)
 
   setwd(paste(env$files.name, "- Results/") )
 
-  library(doParallel)
+  #library(doParallel)
 
   cl2 <- makeCluster(3)
 
@@ -210,18 +210,18 @@ eachOME.run <- function(env)
 
   registerDoParallel(cl2)
 
-  clusterCall(cl2,function()
-  {
-    library(igraph)
-    library(ape)
-    library(tsne)
-    library(fastICA)
-    library(scatterplot3d)
-    library(pixmap)
-    library(fdrtool)
-    library(Biobase)
-    library(biomaRt)
-    library(oposSOM)})
+#  clusterCall(cl2,function()
+#  {
+#    library(igraph)
+#    library(ape)
+#    library(tsne)
+#    library(fastICA)
+#    library(scatterplot3d)
+#    library(pixmap)
+#    library(fdrtool)
+#    library(Biobase)
+#    library(biomaRt)
+#    library(oposSOM)})
 
 
   w=modsom$w

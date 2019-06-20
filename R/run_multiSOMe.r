@@ -1,19 +1,19 @@
 run.som <- function(modpar=modpar,modsom=modsom)
 {
-  library(oposSOM)
+  #library(oposSOM)
 
-  library(igraph)
-  library(ape)
-  library(tsne)
-  library(som)
-  library(fastICA)
+  #library(igraph)
+  #library(ape)
+  #library(tsne)
+  #library(som)
+  #library(fastICA)
 
   #source("multiSOMe.r")
 
 
   env <- opossom.new(list(dataset.name = paste(modpar$dataset.name,modpar$weight,sep="_"),
 
-                          dim.1stLvlSom = "auto",
+                          dim.1stLvlSom = modpar$dim.1stLvlSom,
                           dim.2ndLvlSom = 20,
 
                           training.extension = 1,
@@ -21,7 +21,7 @@ run.som <- function(modpar=modpar,modsom=modsom)
                           flip.SOM.portraits = F,
 
                           database.biomart = modpar$database.biomart,
-                          database.host = "apr2019.archive.ensembl.org",#"www.ensembl.org",
+                          database.host = modpar$database.host,
                           database.dataset = modpar$database.dataset,
                           database.id.type =modpar$return.ids,
 

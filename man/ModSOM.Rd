@@ -7,14 +7,16 @@
 ModSOM(indata.exp, indata.meth, group.labels, modpar)
 }
 \arguments{
-\item{indata.exp}{gene expression matrix, Should have the same colnames as indata.meth}
+\item{indata.exp}{gene expression matrix, Should have the same colnames as indata.meth, suffix "exp" will be added automatically}
 
 \item{indata.meth}{DNA methylation matrix, Should have the same colnames as indata.exp}
 
 \item{modpar}{see manual of modpar function}
+
+\item{w}{weight of e=gene expression and DNA methylation data, if w=0 SOM will be trained according to DNA methylation data, if w=1 SOM will be trained according to gene expression data}
 }
 \value{
-modified matrix for input
+modified matrix for input, harmonization weights for expression and methylation (to make the comparable)
 }
 \description{
 Preparation of data for multiSOMe analysis

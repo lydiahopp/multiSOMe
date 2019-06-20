@@ -1,14 +1,13 @@
 Package: multiSOMe
 Type: Package
 Title: Integration of multiple OME data sets using SOMs
-Version: 0.1.3
+Version: 0.1.4
 Author: Lydia Hopp
 Maintainer: Lydia Hopp <hopp@izbi.uni-leipzig.de>
 Description: Integration of multiple OME data sets using SOMs
 License: GPL-2
 LazyData: true
 #RoxygenNote: 6.0.1
-Depends: R (>= 3.2.2), oposSOM
-Imports:
-  doParallel  
+Depends: R (>= 3.4), oposSOM
+Imports: igraph, fastICA, tsne, scatterplot3d, pixmap, fdrtool, ape, biomaRt, Biobase, RcppParallel, Rcpp, doParallel
 RoxygenNote: 6.1.0
