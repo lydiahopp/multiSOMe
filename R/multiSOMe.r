@@ -107,7 +107,7 @@ multiSOMe.run <- function(env)
 
   #### Preparation & Calculation part ####
 
-  if (!util.call(oposSOM:::pipeline.checkInputParameters, env)) {
+  if (!util.call(pipeline.checkInputParameters, env)) {
     return()
   }
 
@@ -126,43 +126,48 @@ multiSOMe.run <- function(env)
 
     # if(env$preferences$activated.modules$primary.analysis)
     #  {
-    #    util.call(oposSOM:::pipeline.qualityCheck, env)
+    #    util.call(pipeline.qualityCheck, env)
     #  }
   }
 
   if(env$preferences$activated.modules$primary.analysis || env$preferences$activated.modules$geneset.analysis)
   {
     util.info("Loading gene annotation data. This may take several minutes until next notification.")
-    biomart.available <- oposSOM:::biomart.available
-    util.call(oposSOM:::pipeline.prepareAnnotation, env)
+    biomart.available <- biomart.available
+    util.call(pipeline.prepareAnnotation, env)
   }
 
   if(env$preferences$activated.modules$primary.analysis)
   {
     util.info("Processing SOM. This may take several time until next notification.")
-    util.call(oposSOM:::pipeline.prepareIndata, env)
-    util.call(oposSOM:::pipeline.generateSOM, env)
+    util.call(pipeline.prepareIndata, env)
+    util.call(pipeline.generateSOM, env)
 
     filename <- paste(env$files.name, "pre.RData")
     util.info("Saving environment image:", filename)
     save(env, file=filename)
 
     util.info("Processing Differential Expression Statistics")
-    #  Get.Running.Average <- oposSOM:::Get.Running.Average
-    util.call(oposSOM:::pipeline.calcStatistics, env)
+    #  Get.Running.Average <- Get.Running.Average
+    util.call(pipeline.calcStatistics, env)
 
     util.info("Detecting Spots")
-    util.call(oposSOM:::pipeline.detectSpotsSamples, env)
-    util.call(oposSOM:::pipeline.detectSpotsIntegral, env)
-    util.call(oposSOM:::pipeline.patAssignment, env)
-    util.call(oposSOM:::pipeline.groupAssignment, env)
+    util.call(pipeline.detectSpotsSamples, env)
+    util.call(pipeline.detectSpotsIntegral, env)
+    util.call(pipeline.patAssignment, env)
+    util.call(pipeline.groupAssignment, env)
   }
+
+  dir.create(paste(env$files.name, "- Results/Sample Similarity Analysis"), showWarnings=FALSE)
+   util.call(pipeline.sampleSimilarityAnalysisCor, env)
+  util.call(pipeline.sampleSimilarityAnalysisICA, env)
+
 
   if (env$preferences$activated.modules$geneset.analysis)
   {
     util.info("Calculating Geneset Enrichment")
-    util.call(oposSOM:::pipeline.genesetStatisticSamples, env)
-    util.call(oposSOM:::pipeline.genesetStatisticIntegral, env)
+    util.call(pipeline.genesetStatisticSamples, env)
+    util.call(pipeline.genesetStatisticIntegral, env)
   }
 
 
@@ -182,9 +187,9 @@ multiSOMe.run <- function(env)
 
 
   util.info("Plotting Supporting Information")
-  util.call(oposSOM:::pipeline.supportingMaps, env)
-  #util.call(oposSOM:::pipeline.entropyProfiles, env)
-  #util.call(oposSOM:::pipeline.topologyProfiles, env)
+  util.call(pipeline.supportingMaps, env)
+  #util.call(pipeline.entropyProfiles, env)
+  #util.call(pipeline.topologyProfiles, env)
 
 
 
@@ -202,13 +207,6 @@ eachOME.run <- function(env)
 
   setwd(paste(env$files.name, "- Results/") )
 
-  #library(doParallel)
-
-  cl2 <- makeCluster(3)
-
-  cat( "\n\n\nStarted:", format(Sys.time(), "%a %b %d %X\n" ) )
-
-  registerDoParallel(cl2)
 
 #  clusterCall(cl2,function()
 #  {
@@ -241,11 +239,21 @@ eachOME.run <- function(env)
   group.metadata.meth = do.call(cbind, by(t(metadata.ome), group.labels.meth, colMeans))[,unique(group.labels.meth)]
 
 
-  if(group.labels.exp==group.labels.meth)
+  if( length(group.labels.exp)==length(group.labels.meth) &&(group.labels.exp==group.labels.meth))
     {util.call(meanportraits, env)}
 
+  library(doParallel)
 
-  foreach(iterat=1:3) %dopar%
+  cluster.num=if( length(group.labels.exp)==length(group.labels.meth) &&(group.labels.exp==group.labels.meth)) 3 else 2
+
+  cl2 <- makeCluster(cluster.num)
+
+  cat( "\n\n\nStarted:", format(Sys.time(), "%a %b %d %X\n" ) )
+
+  registerDoParallel(cl2)
+
+
+  foreach(iterat=1:cluster.num) %dopar%
   {
 
     if(iterat==1)
@@ -255,6 +263,7 @@ eachOME.run <- function(env)
       env$indata=indata.exp
       env$metadata=metadata.exp
       env$group.colors=env$group.colors[-ids]
+      env$groupwise.group.colors=env$groupwise.group.colors[ unique(env$group.labels)]
 
       env$samples.GSZ.scores=env$samples.GSZ.scores[,-ids]
 
@@ -274,6 +283,7 @@ eachOME.run <- function(env)
       env$metadata=metadata.ome
       env$indata=indata.ome
       env$group.colors=env$group.colors[ids]
+      env$groupwise.group.colors=env$groupwise.group.colors[ unique(env$group.labels)]
 
       env$samples.GSZ.scores=env$samples.GSZ.scores[,ids]
 
@@ -286,7 +296,7 @@ eachOME.run <- function(env)
       env$spot.list.samples=env$spot.list.samples [ids]
       env$pat.labels= env$pat.labels[ids]
     }
-    if(iterat==3 && group.labels.exp==group.labels.meth)
+    if(iterat==3)
     {
       env$files.name="ScoV"
       env$metadata=sign(metadata.ome*metadata.exp)*sqrt(abs(metadata.ome*metadata.exp))
@@ -329,66 +339,67 @@ eachOME.run <- function(env)
         "Summary Sheets Samples"=paste(env$files.name, "- Results/Summary Sheets - Samples"),
         "Summary Sheets Modules"=paste(env$files.name, "- Results/Summary Sheets - Modules"))
 
- #   pipeline.moduleCorrelationMap <- oposSOM:::pipeline.moduleCorrelationMap
-#    modules.report.sheets <- oposSOM:::modules.report.sheets
+ #   pipeline.moduleCorrelationMap <- pipeline.moduleCorrelationMap
+#    modules.report.sheets <- modules.report.sheets
 
-    if(iterat==3 && group.labels.exp==group.labels.meth)
+    if(iterat==3)
     {
-      util.call(oposSOM:::pipeline.calcStatistics, env)
+      util.call(pipeline.calcStatistics, env)
 
       util.info("Detecting Spots")
-      util.call(oposSOM:::pipeline.detectSpotsSamples, env)
-      util.call(oposSOM:::pipeline.detectSpotsIntegral, env)
-      util.call(oposSOM:::pipeline.patAssignment, env)
-      util.call(oposSOM:::pipeline.groupAssignment, env)
+      util.call(pipeline.detectSpotsSamples, env)
+      util.call(pipeline.detectSpotsIntegral, env)
+      util.call(pipeline.patAssignment, env)
+      util.call(pipeline.groupAssignment, env)
 
       if (env$preferences$activated.modules$geneset.analysis)
       {
-        util.call(oposSOM:::pipeline.genesetStatisticSamples, env)
-        util.call(oposSOM:::pipeline.genesetStatisticIntegral, env)
+        util.call(pipeline.genesetStatisticSamples, env)
+        util.call(pipeline.genesetStatisticIntegral, env)
       }
 
     }
-   # util.call(oposSOM:::pipeline.supportingMaps, env)
+   # util.call(pipeline.supportingMaps, env)
     if(iterat!=3)
     {
-      util.call(oposSOM:::pipeline.entropyProfiles, env)
-      util.call(oposSOM:::pipeline.topologyProfiles, env)
+      util.call(pipeline.supportingMaps, env)
+      util.call(pipeline.entropyProfiles, env)
+      util.call(pipeline.topologyProfiles, env)
     }
 
-    util.call(oposSOM:::pipeline.sampleExpressionPortraits, env)
-    util.call(oposSOM:::pipeline.patAssignment, env)
-    util.call(oposSOM:::pipeline.groupAssignment, env)
-    #util.call(oposSOM:::pipeline.groupAnalysis, env)
+    util.call(pipeline.sampleExpressionPortraits, env)
+    util.call(pipeline.patAssignment, env)
+    util.call(pipeline.groupAssignment, env)
+    #util.call(pipeline.groupAnalysis, env)
 
 
-   # modules.CSV.sheets<-oposSOM:::modules.CSV.sheets
-  #  groupSpecificGenesets<-  oposSOM:::pipeline.groupSpecificGenesets
+   # modules.CSV.sheets<-modules.CSV.sheets
+  #  groupSpecificGenesets<-  pipeline.groupSpecificGenesets
 
 
-    util.call(oposSOM:::pipeline.sampleSimilarityAnalysisED , env)
-    util.call(oposSOM:::pipeline.sampleSimilarityAnalysisSOM, env)
-    util.call(oposSOM:::pipeline.sampleSimilarityAnalysisCor, env)
-    util.call(oposSOM:::pipeline.sampleSimilarityAnalysisICA, env)
+    util.call(pipeline.sampleSimilarityAnalysisED , env)
+    util.call(pipeline.sampleSimilarityAnalysisSOM, env)
+    util.call(pipeline.sampleSimilarityAnalysisCor, env)
+    util.call(pipeline.sampleSimilarityAnalysisICA, env)
 
     if (env$preferences$activated.modules$geneset.analysis)
     {
       dir.create(paste(env$files.name, "- Results/Geneset Analysis"), showWarnings=FALSE)
 
       util.info("Plotting Geneset Enrichment Heatmaps")
-      util.call(oposSOM:::pipeline.genesetOverviews, env)
+      util.call(pipeline.genesetOverviews, env)
 
       util.info("Plotting Geneset Profiles and Maps")
-      util.call(oposSOM:::pipeline.genesetProfilesAndMaps, env)
+      util.call(pipeline.genesetProfilesAndMaps, env)
     }
 
     util.info("Calculating Cancer Hallmark Enrichment")
-    util.call(oposSOM:::pipeline.cancerHallmarks, env)
+    util.call(pipeline.cancerHallmarks, env)
     util.info("Writing Gene Lists")
-    util.call(oposSOM:::pipeline.geneLists, env)
+    util.call(pipeline.geneLists, env)
 
     util.info("Plotting Summary Sheets (Samples)")
-    util.call(oposSOM:::pipeline.summarySheetsSamples, env)
+    util.call(pipeline.summarySheetsSamples, env)
 
     util.info("Plotting Summary Sheets (Modules & PATs)")
 
@@ -396,19 +407,19 @@ eachOME.run <- function(env)
     {
       util.call(ScoV.underexp,env)
     }
-   # util.call(oposSOM:::pipeline.summarySheetsModules, env)
-    util.call(oposSOM:::pipeline.summarySheetsModules, env)
-    util.call(oposSOM:::pipeline.summarySheetsPATs, env)
+   # util.call(pipeline.summarySheetsModules, env)
+    util.call(pipeline.summarySheetsModules, env)
+    util.call(pipeline.summarySheetsPATs, env)
 
 
     #   if(env$preferences$activated.modules$group.analysis && length(unique(env$group.labels)) >= 2)
     #{
             util.info("Processing Group-centered Analyses")
-            util.call(oposSOM:::pipeline.groupAnalysis, env)
+            util.call(pipeline.groupAnalysis, env)
     #}
 
             util.info("Processing Difference Analyses")
-            util.call(oposSOM:::pipeline.differenceAnalyses, env)
+            util.call(pipeline.differenceAnalyses, env)
 
 
     filename <- paste(env$files.name, ".RData", sep="")
@@ -419,15 +430,15 @@ eachOME.run <- function(env)
 
     if(iterat!=3)
     {
-    util.call(oposSOM:::pipeline.calcStatistics, env)
+    util.call(pipeline.calcStatistics, env)
     util.info("Detecting Spots")
-    util.call(oposSOM:::pipeline.detectSpotsSamples, env)
-    util.call(oposSOM:::pipeline.detectSpotsIntegral, env)
+    util.call(pipeline.detectSpotsSamples, env)
+    util.call(pipeline.detectSpotsIntegral, env)
 
     if (env$preferences$activated.modules$geneset.analysis)
     {
       util.info("Calculating Geneset Enrichment")
-      util.call(oposSOM:::pipeline.genesetStatisticIntegral, env)
+      util.call(pipeline.genesetStatisticIntegral, env)
     }
 
 
@@ -437,7 +448,7 @@ eachOME.run <- function(env)
         "Summary Sheets Samples"=paste(env$files.name, "- Results/Summary Sheets - Samples"),
         "Summary Sheets Modules"=paste(env$files.name, "- Results/Summary Sheets - Modules",env$files.name))
 
-    util.call(oposSOM:::pipeline.supportingMaps, env)
+    util.call(pipeline.supportingMaps, env)
 
     util.info("Plotting Summary Sheets (Modules & PATs)")
     util.call(summarySheetsModules2, env)
