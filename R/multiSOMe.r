@@ -202,8 +202,6 @@ eachOME.run <- function(env)
 
   dir.create(paste(env$files.name, "- Results/only exp - Results/"), showWarnings=FALSE)
   dir.create(paste(env$files.name, "- Results/only meth - Results/"), showWarnings=FALSE)
-  dir.create(paste(env$files.name, "- Results/ScoV - Results/"), showWarnings=FALSE)
-
 
   setwd(paste(env$files.name, "- Results/") )
 
@@ -298,7 +296,10 @@ eachOME.run <- function(env)
     }
     if(iterat==3)
     {
+
       env$files.name="ScoV"
+      dir.create(paste(env$files.name, "- Results"), showWarnings=FALSE)
+
       env$metadata=sign(metadata.ome*metadata.exp)*sqrt(abs(metadata.ome*metadata.exp))
       env$indata=sign(indata.ome*indata.exp)*sqrt(abs(indata.ome*indata.exp))
 

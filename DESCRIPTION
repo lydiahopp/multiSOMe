@@ -1,7 +1,7 @@
 Package: multiSOMe
 Type: Package
 Title: Integration of multiple OME data sets using SOMs
-Version: 0.1.5
+Version: 0.1.6
 Author: Lydia Hopp
 Maintainer: Lydia Hopp <hopp@izbi.uni-leipzig.de>
 Description: Integration of multiple OME data sets using SOMs
