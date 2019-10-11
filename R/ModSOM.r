@@ -1,11 +1,11 @@
 #' Preparation of data for multiSOMe analysis
 #'
 #' @param indata.exp  gene expression matrix, Should have the same colnames as indata.meth, suffix "exp" will be added automatically
-#' @param indata.meth  DNA methylation matrix, Should have the same colnames as indata.exp
-#' @param w weight of e=gene expression and DNA methylation data, if w=0 SOM will be trained according to DNA methylation data, if w=1 SOM will be trained according to gene expression data
+#' @param indata.meth  DNA methylation matrix, Should have the same colnames as indata.exp. Suffix of ome will be added to the colnames.
+#' @param group.labels character vector of length ncol(indata.exp). Should be in the same order as samples in expression matrix.
 #' @param modpar  see manual of modpar function
 #'
-#' @return modified matrix for input, harmonization weights for expression and methylation (to make the comparable)
+#' @return modified matrix for input, harmonization weights for expression and methylation (to make them comparable)
 #' @export
 #'
 

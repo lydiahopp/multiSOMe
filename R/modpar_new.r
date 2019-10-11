@@ -2,7 +2,7 @@
 #'
 #' @param dataset.name all output will be stored in a folder with the name given
 #' @param meth.type  type of Methylation Assay used. Either '27K' for Infinium HumanMethylation27K or 'K450' for Infinium HumanMethylation450K. If methylation data is already preprocessed and the data matrix contains methylation values per gene per sample set meth.type=""
-#' @param w  weight used to either focus on gene expression (w=0), DNA methylation (w=1) or on both (w=0.5)
+#' @param w  weight used to either focus on gene expression (w=1), DNA methylation (w=0) or on both (w=0.5)
 #' @param mean.norm.exp  enables centralization of the expression features (boolean)
 #' @param mean.norm.meth  enables centralization of the methylation features (boolean)
 #' @param quant.exp  enables quantile normalization of the expression samples (boolean)
